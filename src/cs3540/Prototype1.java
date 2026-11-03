@@ -71,6 +71,15 @@ public class Prototype1 extends PApplet {
 		Collections.shuffle(destinations); // randomize the order of the button; don't change this.
 	}
 
+	
+	public boolean isValid() {
+		Destination d = destinations.get(trialIndex);
+		boolean closeDist = dist(d.x, d.y, logoX, logoY) < inchToPix(.05f); // has to be within +-0.05"
+		boolean closeRotation = calculateDifferenceBetweenAngles(d.rotation, logoRotation) <= 5;
+		boolean closeZ = abs(d.z - logoZ) < inchToPix(.1f); // has to be within +-0.1"
+		return closeDist && closeRotation && closeZ;
+	}
+	
 	public void draw() {
 
 		background(40); // background is dark grey
@@ -98,10 +107,14 @@ public class Prototype1 extends PApplet {
 			rotate(radians(d.rotation)); // rotate around the origin of the destination trial
 			noFill();
 			strokeWeight(3f);
-			if (trialIndex == i)
-				stroke(255, 0, 0, 192); // set color to semi translucent
-			else
+			if (trialIndex == i) {
+				if (isValid())
+					stroke(0, 255, 0, 192);
+				else
+					stroke(255, 0, 0, 192); // set color to semi translucent
+			} else
 				stroke(128, 128, 128, 128); // set color to semi translucent
+			circle(0,0,1);
 			rect(0, 0, d.z, d.z);
 			popMatrix();
 		}
@@ -119,60 +132,74 @@ public class Prototype1 extends PApplet {
 		fill(255);
 		scaffoldControlLogic(); // you are going to want to replace this!
 		text("Trial " + (trialIndex + 1) + " of " + trialCount, width / 2, inchToPix(.8f));
+		
+		text("'F' = snap to cursor | 'R' = rotate towards cursor | 'Z' = scale towards cursor", 400, 600-30);
 	}
 
+	// first attempt with multiple modes separate
+
+	boolean snapToCursor = false;
+	boolean rotate = false;
+	boolean scale = false;
+
+	
+	public void keyPressed() {
+		if (startTime == 0) // start time on the instant of the first keydown
+		{
+			startTime = millis();
+			println("time started!");
+		}
+		
+		if (key == 'f') snapToCursor = true;
+		if (key == 'r') rotate = true;
+		if (key == 'z') scale = true;
+		
+	}
+	public void keyReleased() {
+		if (key == 'f') snapToCursor = false;
+		if (key == 'r') rotate = false;
+		if (key == 'z') scale = false;
+	}
+
+	
 	// my example design for control, which is terrible
 	void scaffoldControlLogic() {
-		// upper left corner, rotate counterclockwise
-		text("CCW", inchToPix(.4f), inchToPix(.4f));
-		if (mousePressed && dist(0, 0, mouseX, mouseY) < inchToPix(.8f))
-			logoRotation--;
+		
 
-		// upper right corner, rotate clockwise
-		text("CW", width - inchToPix(.4f), inchToPix(.4f));
-		if (mousePressed && dist(width, 0, mouseX, mouseY) < inchToPix(.8f))
-			logoRotation++;
-
-		// lower left corner, decrease Z
-		text("-", inchToPix(.4f), height - inchToPix(.4f));
-		if (mousePressed && dist(0, height, mouseX, mouseY) < inchToPix(.8f))
-			logoZ = constrain(logoZ - inchToPix(.02f), (float) .01, inchToPix(4f)); // leave min and max alone!
-
-		// lower right corner, increase Z
-		text("+", width - inchToPix(.4f), height - inchToPix(.4f));
-		if (mousePressed && dist(width, height, mouseX, mouseY) < inchToPix(.8f))
-			logoZ = constrain(logoZ + inchToPix(.02f), (float) .01, inchToPix(4f)); // leave min and max alone!
-
-		// left middle, move left
-		text("left", inchToPix(.4f), height / 2);
-		if (mousePressed && dist(0, height / 2, mouseX, mouseY) < inchToPix(.8f))
-			logoX -= inchToPix(.02f);
-
-		text("right", width - inchToPix(.4f), height / 2);
-		if (mousePressed && dist(width, height / 2, mouseX, mouseY) < inchToPix(.8f))
-			logoX += inchToPix(.02f);
-
-		text("up", width / 2, inchToPix(.4f));
-		if (mousePressed && dist(width / 2, 0, mouseX, mouseY) < inchToPix(.8f))
-			logoY -= inchToPix(.02f);
-
-		text("down", width / 2, height - inchToPix(.4f));
-		if (mousePressed && dist(width / 2, height, mouseX, mouseY) < inchToPix(.8f))
-			logoY += inchToPix(.02f);
+		if (snapToCursor) {
+			logoX = mouseX;
+			logoY = mouseY;
+		}
+		if (rotate) {
+			logoRotation = (float)Math.toDegrees(Math.atan2(logoY - mouseY, logoX - mouseX));
+		}
+		if (scale) {
+			float x2 = mouseX;
+			float x1 = logoX;
+			float y2 = mouseY;
+			float y1 = logoY;
+			float dist = (float)Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+			logoZ = dist*2;
+		}
+		
 	}
 
 	public void mousePressed() {
+		
+		// this code is going to be moved to the second the user presses any of the "mode selectors"
+		/*
 		if (startTime == 0) // start time on the instant of the first user click
 		{
 			startTime = millis();
 			println("time started!");
 		}
+		*/
 	}
 
 	public void mouseReleased() {
 		// check to see if user clicked middle of screen within 3 inches, which this
 		// code uses as a submit button
-		if (dist(width / 2, height / 2, mouseX, mouseY) < inchToPix(3f)) {
+		if (dist(width / 2, height / 2, mouseX, mouseY) < inchToPix(800f)) {
 			if (userDone == false && !checkForSuccess())
 				errorCount++;
 
