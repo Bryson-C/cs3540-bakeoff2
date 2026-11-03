@@ -16,7 +16,7 @@ public class Prototype3 extends PApplet {
     // These are variables you should probably leave alone
     int index = 0;
     float border = 0;
-    int trialCount = 2;
+    int trialCount = 12;
     int trialIndex = 0;
     int errorCount = 0;
     float errorPenalty = 0.5f;
