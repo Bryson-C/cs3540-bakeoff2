@@ -5,40 +5,40 @@ import java.util.Collections;
 import processing.core.PApplet;
 
 public class Prototype2 extends PApplet {
-
-	// these are variables you should probably leave alone
-	int index = 0; // starts at zero-ith trial
-	float border = 0; // some padding from the sides of window, set later
-	int trialCount = 12; // this will be set higher for the bakeoff
-	int trialIndex = 0; // what trial are we on
-	int errorCount = 0; // used to keep track of errors
-	float errorPenalty = 0.5f; // for every error, add this value to mean time
-	int startTime = 0; // time starts when the first click is captured
-	int finishTime = 0; // records the time of the final click
-	boolean userDone = false; // is the user done
-
-	final int screenPPI = 72; // what is the DPI of the screen you are using
-	// you can test this by drawing a 72x72 pixel rectangle in code, and then
-	// confirming with a ruler it is 1x1 inch.
-
-	// These variables are for my example design. Your input code should
-	// modify/replace these!
-	float logoX = 500;
-	float logoY = 500;
-	float logoZ = 50f;
-	float logoRotation = 0;
-
-	// The argument passed to main must match the class name
-	public static void main(String[] args) {
-		// Tell processing what class we want to run.
-		PApplet.main("cs3540.Prototype2");
-	}
-
 	private class Destination {
 		float x = 0;
 		float y = 0;
 		float rotation = 0;
 		float z = 0;
+	}
+
+	static final int screenPPI = 72; // what is the DPI of the screen you are using
+	// you can test this by drawing a 72x72 pixel rectangle in code, and then
+	// confirming with a ruler it is 1x1 inch.
+
+	// these are variables you should probably leave alone
+	static final int trialCount = 12; // this will be set higher for the bakeoff
+	static final float errorPenalty = 0.5f; // for every error, add this value to mean time
+	static final float border = inchToPix(2f); // some padding from the sides of window
+
+	boolean keyDown = false; // is a key on the keyboard held down?
+	boolean userDone = false; // is the user done
+	int trialIndex = 0; // what trial are we on
+	int errorCount = 0; // used to keep track of errors
+	int startTime = 0; // time starts when the first click is captured
+	int finishTime = 0; // records the time of the final click
+
+	// These variables are for my example design. Your input code should
+	// modify/replace these!
+	float logoX = 500f;
+	float logoY = 500f;
+	float logoZ = 50f;
+	float logoRotation = 0f;
+	
+	// The argument passed to main must match the class name
+	public static void main(String[] args) {
+		// Tell processing what class we want to run.
+		PApplet.main("cs3540.Prototype2");
 	}
 
 	ArrayList<Destination> destinations = new ArrayList<Destination>();
@@ -48,13 +48,9 @@ public class Prototype2 extends PApplet {
 	}
 
 	public void setup() {
-		rectMode(CENTER);
+		rectMode(CENTER); // draw rectangles not from upper left, but from the center outwards
 		textFont(createFont("Arial", inchToPix(.3f))); // sets the font to Arial that is 0.3" tall
 		textAlign(CENTER);
-		rectMode(CENTER); // draw rectangles not from upper left, but from the center outwards
-
-		// don't change this!
-		border = inchToPix(2f); // padding of 1.0 inches
 
 		for (int i = 0; i < trialCount; i++) // don't change this!
 		{
@@ -72,7 +68,6 @@ public class Prototype2 extends PApplet {
 	}
 
 	public void draw() {
-
 		background(40); // background is dark grey
 		fill(200);
 		noStroke();
@@ -115,79 +110,38 @@ public class Prototype2 extends PApplet {
 		rect(0, 0, logoZ, logoZ);
 		popMatrix();
 
-		// ===========DRAW EXAMPLE CONTROLS=================
+		// ===========DRAW UI=================
 		fill(255);
-		scaffoldControlLogic(); // you are going to want to replace this!
+		controlLogic();
 		text("Trial " + (trialIndex + 1) + " of " + trialCount, width / 2, inchToPix(.8f));
 	}
 
-	// my example design for control, which is terrible
-	void scaffoldControlLogic() {
-		// upper left corner, rotate counterclockwise
-		text("CCW", inchToPix(.4f), inchToPix(.4f));
-		if (mousePressed && dist(0, 0, mouseX, mouseY) < inchToPix(.8f))
-			logoRotation--;
+	public void keyPressed() {
+		keyDown = true;
 
-		// upper right corner, rotate clockwise
-		text("CW", width - inchToPix(.4f), inchToPix(.4f));
-		if (mousePressed && dist(width, 0, mouseX, mouseY) < inchToPix(.8f))
-			logoRotation++;
-
-		// lower left corner, decrease Z
-		text("-", inchToPix(.4f), height - inchToPix(.4f));
-		if (mousePressed && dist(0, height, mouseX, mouseY) < inchToPix(.8f))
-			logoZ = constrain(logoZ - inchToPix(.02f), (float) .01, inchToPix(4f)); // leave min and max alone!
-
-		// lower right corner, increase Z
-		text("+", width - inchToPix(.4f), height - inchToPix(.4f));
-		if (mousePressed && dist(width, height, mouseX, mouseY) < inchToPix(.8f))
-			logoZ = constrain(logoZ + inchToPix(.02f), (float) .01, inchToPix(4f)); // leave min and max alone!
-
-		// left middle, move left
-		text("left", inchToPix(.4f), height / 2);
-		if (mousePressed && dist(0, height / 2, mouseX, mouseY) < inchToPix(.8f))
-			logoX -= inchToPix(.02f);
-
-		text("right", width - inchToPix(.4f), height / 2);
-		if (mousePressed && dist(width, height / 2, mouseX, mouseY) < inchToPix(.8f))
-			logoX += inchToPix(.02f);
-
-		text("up", width / 2, inchToPix(.4f));
-		if (mousePressed && dist(width / 2, 0, mouseX, mouseY) < inchToPix(.8f))
-			logoY -= inchToPix(.02f);
-
-		text("down", width / 2, height - inchToPix(.4f));
-		if (mousePressed && dist(width / 2, height, mouseX, mouseY) < inchToPix(.8f))
-			logoY += inchToPix(.02f);
-	}
-
-	public void mousePressed() {
-		if (startTime == 0) // start time on the instant of the first user click
-		{
-			startTime = millis();
-			println("time started!");
+		// these are things that should only trigger on the rising edge
+		switch (key) {
+		case ' ':
+			finishTrial();
+			break;
+		default:
+			break;
 		}
 	}
 
-	public void mouseReleased() {
-		// check to see if user clicked middle of screen within 3 inches, which this
-		// code uses as a submit button
-		if (dist(width / 2, height / 2, mouseX, mouseY) < inchToPix(3f)) {
-			if (userDone == false && !checkForSuccess())
-				errorCount++;
+	public void keyReleased() {
+		keyDown = false;
 
-			trialIndex++; // and move on to next trial
-
-			if (trialIndex == trialCount && userDone == false) {
-				userDone = true;
-				finishTime = millis();
-			}
+		// these are things that should only trigger on the falling edge
+		switch (key) {
+		default:
+			break;
 		}
 	}
 
 	// probably shouldn't modify this, but email me if you want to for some good
 	// reason.
-	public boolean checkForSuccess() {
+	public final boolean checkForSuccess() {
 		Destination d = destinations.get(trialIndex);
 		boolean closeDist = dist(d.x, d.y, logoX, logoY) < inchToPix(.05f); // has to be within +-0.05"
 		boolean closeRotation = calculateDifferenceBetweenAngles(d.rotation, logoRotation) <= 5;
@@ -203,8 +157,12 @@ public class Prototype2 extends PApplet {
 		return closeDist && closeRotation && closeZ;
 	}
 
+	public final boolean timerHasStarted() {
+		return startTime == 0;
+	}
+
 	// utility function I include to calc diference between two angles
-	double calculateDifferenceBetweenAngles(float a1, float a2) {
+	static final double calculateDifferenceBetweenAngles(float a1, float a2) {
 		double diff = abs(a1 - a2);
 		diff %= 90;
 		if (diff > 45)
@@ -214,7 +172,85 @@ public class Prototype2 extends PApplet {
 	}
 
 	// utility function to convert inches into pixels based on screen PPI
-	float inchToPix(float inch) {
+	static final float inchToPix(float inch) {
 		return inch * screenPPI;
+	}
+
+	void controlLogic() {
+		float translationSpeed = inchToPix(.02f);
+		float rotationSpeed = 1f;
+
+		// Everything else in this method assumes the user is holding down a key.
+		if (!keyDown) {
+			return;
+		}
+		
+		if (timerHasStarted()) {
+			startTimer();
+		}
+
+		switch (key) {
+		case 'A':
+		case 'a':
+			logoX -= translationSpeed;
+			break;
+		case 'D':
+		case 'd':
+			logoX += translationSpeed;
+			break;
+		case 'W':
+		case 'w':
+			logoY -= translationSpeed;
+			break;
+		case 'S':
+		case 's':
+			logoY += translationSpeed;
+			break;
+		case 'Q':
+		case 'q':
+			logoRotation -= rotationSpeed;
+			break;
+		case 'E':
+		case 'e':
+			logoRotation += rotationSpeed;
+			break;
+		case CODED:
+			switch (keyCode) {
+			case DOWN:
+				logoZ = constrain(logoZ - translationSpeed, .01f, inchToPix(4f)); // leave min and max alone!
+				break;
+			case UP:
+				logoZ = constrain(logoZ + translationSpeed, .01f, inchToPix(4f)); // leave min and max alone!
+				break;
+			default:
+				break;
+			}
+		default:
+			break;
+		}
+	}
+
+	void startTimer() {
+		startTime = millis();
+		println("time started!");
+	}
+
+	void stopTimer() {
+		userDone = true;
+		finishTime = millis();
+	}
+
+	void finishTrial() {
+		if (userDone) {
+			return;
+		}
+
+		if (!checkForSuccess()) {
+			errorCount++;
+		}
+
+		if (++trialIndex >= trialCount) {
+			stopTimer();
+		}
 	}
 }
