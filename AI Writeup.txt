@@ -3,3 +3,5 @@ No AI was used to touch up the final product. Our final product was upgrading us
 
 Usage In Bake-off 2:
 AI usage for our group was incredibly limited. AI was mostly limited to the required 3 ideas. I think this is largely because the task was simple enough where human ideas are still better – AI doesn’t understand humans like humans do. I also believe that processing is easy enough to not need AI to help, and there are also ethical concerns with AI which would limit our usage. AI might be better used to write code with more interconnected parts and to write bug tests, but when it comes to simple projects, there is not much of a need for using AI.
+
+(We've agreed it's fine to share this anonymously)
