@@ -13,7 +13,7 @@ public class Final extends PApplet {
 	int trialIndex = 0; // what trial are we on
 	int errorCount = 0; // used to keep track of errors
 	float errorPenalty = 0.5f; // for every error, add this value to mean time
-	int startTime = 0; // time starts when the first click is captured
+	int startTime = 0; // time starts when the first keypress is captured (our prototype doesn't use clicks)
 	int finishTime = 0; // records the time of the final click
 	boolean userDone = false; // is the user done
 
